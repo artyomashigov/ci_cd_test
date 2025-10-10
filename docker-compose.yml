@@ -1,7 +1,9 @@
 services:
   backend:
-    image: my-backend-image:latest
+    build: .                       # build the image from  Dockerfile
+    image: my-backend-image:latest 
     container_name: my-backend-container
     ports:
-      - 80:8000
-    command: "python main.py"
+      - "80:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped

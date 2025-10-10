@@ -9,35 +9,29 @@ jobs:
     name: build docker image
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: build image
-        run: docker build -t my-backend-image .
+        run: docker build -t my-backend-image:latest .
 
   test:
     name: test docker image
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: build image again (required on fresh runner)
-        run: docker build -t my-backend-image .
-
-      - name: run pytest
-        run: docker run --rm my-backend-image pytest -s -v || echo "no tests found"
+      - uses: actions/checkout@v4
+      # build again on this fresh runner so the image exists here too
+      - name: build image (current runner)
+        run: docker build -t my-backend-image:latest .
+      - name: run pytest inside container
+        run: docker run --rm my-backend-image:latest pytest -s -v || echo "no tests found"
 
   deploy:
-    name: deploy container
+    name: deploy with docker compose
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: start docker compose
+      - uses: actions/checkout@v4
+      - name: compose up (build if needed)
         run: |
           docker compose down || true
-          docker compose up -d
+          docker compose up -d --build
