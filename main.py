@@ -7,7 +7,7 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"msg": "Hello World!"}
+    return {"msg": "Hello CI/CD!"}
 
 
 if __name__ == "__main__":
