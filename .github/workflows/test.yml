@@ -6,26 +6,38 @@ on:
 
 jobs:
   build:
+    name: Build Docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: docker build -t my-backend-image:latest .
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t my-backend-image:latest .
 
   test:
+    name: Run API tests
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v4
-      - run: docker build -t my-backend-image:latest .
-      - run: docker run --rm my-backend-image:latest pytest -s -v || echo "no tests found"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image for testing
+        run: docker build -t my-backend-image:latest .
+
+      - name: Run tests with pytest
+        run: docker run --rm my-backend-image:latest pytest -s -v
 
   deploy:
-    name: deploy on ec2
-    runs-on: [self-hosted, linux, ec2-ci]   # <-- your EC2 runner
+    name: Deploy to EC2
+    runs-on: [self-hosted, linux, ec2-ci]   # tags from your GitHub runner
     needs: test
     steps:
-      - uses: actions/checkout@v4
-      - name: compose up on server
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy with Docker Compose
         run: |
           docker compose down || true
           docker compose up -d --build
