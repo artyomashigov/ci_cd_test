@@ -1,7 +1,7 @@
 services:
   backend:
-    build: .                       # build the image from  Dockerfile
-    image: my-backend-image:latest 
+    build: .
+    image: my-backend-image:latest
     container_name: my-backend-container
     ports:
       - "80:8000"

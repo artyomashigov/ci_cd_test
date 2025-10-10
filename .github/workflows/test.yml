@@ -6,32 +6,26 @@ on:
 
 jobs:
   build:
-    name: build docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: build image
-        run: docker build -t my-backend-image:latest .
+      - run: docker build -t my-backend-image:latest .
 
   test:
-    name: test docker image
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
-      # build again on this fresh runner so the image exists here too
-      - name: build image (current runner)
-        run: docker build -t my-backend-image:latest .
-      - name: run pytest inside container
-        run: docker run --rm my-backend-image:latest pytest -s -v || echo "no tests found"
+      - run: docker build -t my-backend-image:latest .
+      - run: docker run --rm my-backend-image:latest pytest -s -v || echo "no tests found"
 
   deploy:
-    name: deploy with docker compose
-    runs-on: ubuntu-latest
+    name: deploy on ec2
+    runs-on: [self-hosted, linux, ec2-ci]   # <-- your EC2 runner
     needs: test
     steps:
       - uses: actions/checkout@v4
-      - name: compose up (build if needed)
+      - name: compose up on server
         run: |
           docker compose down || true
           docker compose up -d --build
